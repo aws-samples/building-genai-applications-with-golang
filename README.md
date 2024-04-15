@@ -29,14 +29,16 @@ const AOSS_ENDPOINT = ""
 
 ## Introduction
 
-While many production code written in Go, Java, etc., a majority of learning material on building GenAI (Generative Artifical Intelligence) apps now is in Python and JavaScript. So this workshop shows how to get started with Amazon Bedrock in Go through implementing few basic examples without using frameworks like Langchain or Streamlit.
+What we often see in production is a variety on languages written in Go, Java, .Net, however the majority of learning material on building GenAI (Generative Artifical Intelligence) apps currently is in Python and JavaScript. This workshop shows how to get started with Amazon Bedrock in Go through implementing few basic examples without using frameworks like Langchain, Streamlit or React.
+
+Examples include:
 
 - Simple chat and prompt
-- Simple image analyzing
+- Simple image analyser
 - Query vector database
 - Simple RAG (Retrieval Augmented Generation) application
 
-In addition, you will implement these features using only basic concepts and without relying on framework like LangChain, Streamlit, or React. This help you really understand and master fundamental concepts. For example
+You will implement these features using only basic programing concepts without having to learn a new framework to help you really understand and master fundamental concepts.
 
 - Stream response
 - Message API of Anthropic Claude 3 Model
