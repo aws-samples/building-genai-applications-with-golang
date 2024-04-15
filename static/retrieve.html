@@ -1,0 +1,178 @@
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width" />
+    <style>
+      :root {
+        box-sizing: border-box;
+      }
+      *,
+      ::before,
+      ::after {
+        box-sizing: inherit;
+      }
+
+      body {
+        /* background-color: antiquewhite; */
+      }
+
+      .container {
+        width: 100%;
+        max-width: 500px;
+        margin: auto;
+        /* background-color: antiquewhite; */
+      }
+
+      .button {
+        background-color: #43a047;
+        padding: 8px 20px;
+        border-radius: 5px;
+        border: none;
+        cursor: pointer;
+        position: absolute;
+        transform: translateY(-50%);
+        top: 50%;
+        right: 10px;
+        opacity: 0.8;
+      }
+
+      .button:hover {
+        background-color: orange;
+      }
+
+      .text-input {
+        padding: 10px 15px;
+        width: 100%;
+        outline: none;
+        border: solid black 1px;
+        background-color: #e0e0e0;
+        box-shadow: 0 10px 15px -3px #e0e0e0;
+
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+          sans-serif;
+        font-size: medium;
+        font-weight: 400;
+        letter-spacing: normal;
+        line-height: 25px;
+      }
+
+      .text-input:focus {
+        border: solid #4caf50 1.5px;
+        outline: none;
+      }
+
+      .container-input {
+        position: relative;
+      }
+
+      .form {
+        margin-top: 20px;
+      }
+
+      .text-model {
+        /* color: #4caf50; */
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+          sans-serif;
+        font-size: medium;
+        font-weight: 400;
+        letter-spacing: normal;
+        line-height: 25px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <form id="form" onkeydown="return event.key != 'Enter';" class="form">
+        <div class="container-input">
+          <input class="text-input" type="text" id="text-input" />
+          <button id="submit" class="button">retrieve</button>
+        </div>
+      </form>
+      <div id="list" class="text-model"></div>
+    </div>
+    <script>
+      const callBedrockStream = async () => {
+        // Get the list container element
+        var listContainer = document.getElementById("list");
+
+        // clear content before query
+        listContainer.innerHTML = "";
+
+        // conversation turns
+        let messages = [];
+
+        // get user question
+        const userQuestion = document.getElementById("text-input").value;
+
+        // push user question to messages
+        messages.push({
+          role: "user",
+          content: [{ type: "text", text: userQuestion }],
+        });
+
+        if (userQuestion) {
+          try {
+            const response = await fetch("/knowledge-base-retrieve", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ messages: messages }),
+            });
+
+            console.log(response);
+
+            const decoder = new TextDecoder();
+
+            // batch processing
+            const json = await response.json();
+            const items = json["RetrievalResults"];
+
+            // update frontend
+            for (var i = 0; i < items.length; i++) {
+              var listItem = document.createElement("div");
+              listItem.style.marginBottom = "15px";
+              listItem.style.borderBottom = "1px solid #0000FF";
+
+              var header = document.createElement("h4");
+              header.textContent = `Chunk ${i}`;
+
+              var itemText = document.createTextNode(
+                items[i]["Content"]["Text"]
+              );
+              listItem.appendChild(header);
+              listItem.appendChild(itemText);
+              listContainer.appendChild(listItem);
+            }
+
+            // push model answer to converstion turn
+            // messages.push({
+            //   role: "assistant",
+            //   content: [{ type: "text", text: modelAnswer.innerText }],
+            // });
+          } catch (error) {
+            console.log(error);
+          }
+        } else {
+          console.log("Please enter question ...");
+        }
+      };
+
+      document
+        .getElementById("submit")
+        .addEventListener("click", async (event) => {
+          event.preventDefault();
+          await callBedrockStream();
+        });
+
+      document
+        .getElementById("text-input")
+        .addEventListener("keydown", async (event) => {
+          if (event.code === "Enter") {
+            await callBedrockStream();
+          }
+        });
+    </script>
+  </body>
+</html>

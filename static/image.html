@@ -1,0 +1,220 @@
+<html>
+  <head>
+    <title>Image Prompt</title>
+    <meta name="viewport" content="width=device-width" />
+    <style>
+      :root {
+        box-sizing: border-box;
+      }
+
+      *,
+      ::before,
+      ::after {
+        box-sizing: inherit;
+      }
+
+      body {
+        background-color: antiquewhite;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: auto;
+      }
+
+      .container-form {
+        position: relative;
+      }
+
+      .input-question {
+        width: 100%;
+        padding: 15px 10px;
+      }
+      .button-submit {
+        background-color: orange;
+        padding: 10px 25px;
+        border-radius: 2px;
+        border: none;
+        outline: none;
+        position: absolute;
+        top: 50%;
+        right: 10px;
+        transform: translateY(-50%);
+        cursor: pointer;
+      }
+
+      .input-file {
+        width: 100%;
+        padding: 10px 10px;
+        background-color: aquamarine;
+        cursor: pointer;
+      }
+
+      .container-image {
+        position: relative;
+        background-color: gainsboro;
+        padding: 10px 10px;
+        align-items: center;
+        justify-content: center;
+        display: flex;
+        max-height: 600px;
+        height: 50%;
+      }
+
+      .description-image {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        background-color: azure;
+        padding: 10px;
+        opacity: 0.9;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div>
+        <div class="container-form">
+          <form onkeydown="return event.key != 'Enter';">
+            <input
+              type="text"
+              id="question"
+              name="question"
+              class="input-question"
+              placeholder="what is in this image?"
+            />
+          </form>
+          <button class="button-submit" id="submit" type="submit">
+            Submit
+          </button>
+        </div>
+        <input type="file" id="file" class="input-file" />
+        <div class="container-image">
+          <img src="" alt="image" id="image" width="auto" height="90%" hidden />
+          <p class="description-image" id="description-image">
+            Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quas
+            mollitia magnam repellat, laudantium tempore voluptatibus qui
+            temporibus eos? Quasi distinctio ut voluptatum vel fugiat
+            exercitationem incidunt, dolorem rem iusto rerum? Lorem ipsum dolor
+            sit amet consectetur adipisicing elit. Unde, quaerat dicta aliquid
+            sapiente cupiditate totam est voluptatem odio. Exercitationem,
+            architecto! Blanditiis rerum ex provident, laborum minus eligendi a
+            aspernatur eum!
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+
+  <script>
+    const fileInput = document.getElementById("file");
+    const image = document.getElementById("image");
+    const submit = document.getElementById("submit");
+    const desc = document.getElementById("description-image");
+
+    //
+    desc.innerText = "";
+    let messages = [];
+
+    // buffer to store image base64 data
+    let imageBase64;
+
+    fileInput.addEventListener("change", (event) => {
+      // reset desc
+      desc.innerText = "";
+      // reset buffer
+      messages = [];
+
+      // get file
+      let file = event.target.files[0];
+      if (file) {
+        var reader = new FileReader();
+        reader.onload = (e) => {
+          // console.log(e.target.result);
+          image.src = e.target.result;
+
+          // base64 image data
+          imageBase64 = e.target.result.split(",")[1];
+
+          console.log(imageBase64);
+
+          image.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // call bedrock to analyse image
+    const analyseImage = async () => {
+      // get user prompt
+      let question = document.getElementById("question").value;
+
+      if ((question == "") | (question == null)) {
+        question = "what is in this image?";
+      }
+
+      // console.log(question);
+      // console.log("submit ", question, imageBase64);
+
+      // form message for bedrock
+      messages.push({
+        role: "user",
+        content: [
+          {
+            type: "image",
+            source: {
+              type: "base64",
+              media_type: "image/jpeg",
+              data: imageBase64,
+            },
+          },
+          { type: "text", text: question },
+        ],
+      });
+
+      // call post request to analyse image
+      try {
+        const response = await fetch("/claude-haiku-image", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ messages: messages }),
+        });
+
+        // console.log(response);
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) {
+            break;
+          }
+          const text = decoder.decode(value);
+          desc.innerText += text;
+          // console.log(text);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+
+      console.log("DONE");
+    };
+
+    submit.addEventListener("click", async (event) => {
+      event.preventDefault();
+
+      await analyseImage();
+    });
+
+    // listen on enter
+    document
+      .getElementById("question")
+      .addEventListener("keydown", async (event) => {
+        if (event.code === "Enter") {
+          await analyseImage();
+        }
+      });
+  </script>
+</html>

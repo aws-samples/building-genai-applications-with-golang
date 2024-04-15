@@ -1,0 +1,147 @@
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Query OpenSearch</title>
+    <style>
+      :root {
+        box-sizing: border-box;
+      }
+      *,
+      ::before,
+      ::after {
+        box-sizing: inherit;
+      }
+
+      body {
+        /* background-color: antiquewhite; */
+      }
+
+      .container {
+        width: 80%;
+        max-width: 500px;
+        margin: auto;
+      }
+
+      .button-submit {
+        background-color: #43a047;
+        padding: 8px 20px;
+        border-radius: 5px;
+        border: none;
+        cursor: pointer;
+        position: absolute;
+        transform: translateY(-50%);
+        top: 50%;
+        right: 10px;
+        opacity: 0.8;
+      }
+
+      .button-submit:hover {
+        background-color: orange;
+      }
+
+      .input-query {
+        padding: 10px 15px;
+        width: 100%;
+        outline: none;
+        border: solid black 1px;
+        background-color: #e0e0e0;
+        box-shadow: 0 10px 15px -3px #e0e0e0;
+
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+          sans-serif;
+        font-size: medium;
+        font-weight: 400;
+        letter-spacing: normal;
+        line-height: 25px;
+      }
+
+      .input-query:focus {
+        border: solid #4caf50 1.5px;
+        outline: none;
+      }
+
+      .container-input {
+        position: relative;
+      }
+
+      .form {
+        margin-top: 20px;
+      }
+
+      .text-model {
+        /* color: #4caf50; */
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+          sans-serif;
+        font-size: medium;
+        font-weight: 400;
+        letter-spacing: normal;
+        line-height: 25px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <form id="form" class="form">
+        <div class="container-input">
+          <input type="text" id="query" name="query" class="input-query" />
+          <button class="button-submit">Ask</button>
+        </div>
+      </form>
+      <div id="list" class="text-model"></div>
+    </div>
+  </body>
+
+  <script>
+    const query = async () => {
+      // Get the list container element
+      var listContainer = document.getElementById("list");
+
+      // clear content before query
+      listContainer.innerHTML = "";
+
+      // const response = await fetch("/query");
+      const query = document.getElementById("query").value;
+
+      const response = await fetch("/query", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ query: query }),
+      });
+
+      const json = await response.json();
+
+      console.log(json);
+
+      // Create an array of items
+      var items = json.Messages;
+
+      // Loop through the items array and create list items (<li>)
+      for (var i = 0; i < items.length; i++) {
+        var listItem = document.createElement("div");
+        listItem.style.marginBottom = "15px";
+        listItem.style.borderBottom = "1px solid #0000FF";
+
+        var header = document.createElement("h4");
+        header.textContent = `Chunk ${i}`;
+
+        var itemText = document.createTextNode(items[i]);
+        listItem.appendChild(header);
+        listItem.appendChild(itemText);
+        listContainer.appendChild(listItem);
+      }
+    };
+
+    document
+      .getElementById("form")
+      .addEventListener("submit", async (event) => {
+        event.preventDefault();
+        console.log("submit form");
+
+        await query();
+      });
+  </script>
+</html>

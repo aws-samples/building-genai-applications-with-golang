@@ -1,0 +1,219 @@
+<html>
+
+<head>
+  <title>Image Prompt</title>
+  <meta name="viewport" content="width=device-width" />
+  <style>
+    :root {
+      box-sizing: border-box;
+    }
+
+    *,
+    ::before,
+    ::after {
+      box-sizing: inherit;
+    }
+
+    /* body {
+      background-color: azure;
+    } */
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+    }
+  </style>
+</head>
+
+<body>
+  <div>
+    <div class="container">
+      <div style="
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+          ">
+        <video id="video" width="640" height="360"></video>
+        <canvas id="canvas" width=640" height="360" style="display: none">
+        </canvas>
+        <button style="
+              background-color: orange;
+              padding: 10px 30px;
+              border-radius: 5px;
+              box-shadow: 5;
+              border: none;
+              outline: none;
+              cursor: pointer;
+              margin-top: 10px;
+            " id="submit">
+          Submit
+        </button>
+      </div>
+    </div>
+    <div style="
+        position: fixed; 
+        top: 0; left: 0; 
+        min-height: 100vh; 
+        width: 100%;
+        background-color: whitesmoke;
+        opacity: 1.0;" 
+        hidden id="modal">
+      <div>
+        <div style="
+            max-width: 800px; 
+            margin: auto; 
+            display: flex; 
+            min-height: 100vh; 
+            justify-content: center; 
+            align-items: center; 
+            flex-direction: column;">
+          <div style="position: relative;">
+            <img width="640" height="auto" id="image" />
+            <p id="imageDescription" style="
+                  position: absolute;
+                  bottom: 0;
+                  left: 0;
+                  background-color: gainsboro;
+                  padding: 5px;
+                  opacity: 0.85;">
+              Lorem ipsum, dolor sit amet consectetur adipisicing elit. Sunt porro minima nemo quidem et, molestiae
+              beatae animi odio libero pariatur exercitationem cupiditate dolorum amet architecto quibusdam aliquid quae
+              numquam voluptatum! Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quisquam quibusdam aut
+              perferendis fuga blanditiis porro ratione fugiat provident quo repellendus! Minima voluptatibus doloribus
+              maiores numquam itaque facilis enim veniam similique?
+            </p>
+          </div>
+
+          <button style="
+            background-color: orange; 
+            padding: 10px 30px ; 
+            border: none; 
+            outline: none; 
+            cursor: pointer;
+            margin-top: 10px;
+            border-radius: 5px;" id="closeModal">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+<script>
+  console.log("Hello");
+  const video = document.getElementById("video");
+  const modal = document.getElementById("modal");
+  const closeButton = document.getElementById("closeModal");
+  const submitButton = document.getElementById("submit");
+  const canvas = document.getElementById("canvas");
+  const image = document.getElementById("image");
+  const desc = document.getElementById("imageDescription");
+
+  const getCamera = async () => {
+    let stream = null;
+
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: 1280, height: 720 },
+      });
+
+      video.srcObject = stream;
+
+      video.onloadedmetadata = () => {
+        video.play();
+      };
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+
+  // close modal 
+  closeButton.addEventListener("click", (event) => {
+    console.log("close modal");
+    modal.style.display = "none"
+  })
+
+  // submit button 
+  submitButton.addEventListener("click", async (event) => {
+    event.preventDefault();
+
+    // plot video on canvas 
+    canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height)
+
+    // image data url 
+    const dataUrl = canvas.toDataURL("image/jpeg")
+
+    // display the image 
+    image.setAttribute("src", dataUrl);
+
+    console.log(dataUrl)
+
+    // turn on modal 
+    modal.style.display = "block"
+
+    // get base64image
+    imageBase64 = dataUrl.split(",")[1];
+
+    // build prompt 
+    let messages = []
+    messages.push({
+      role: "user",
+      content: [
+        {
+          type: "image",
+          source: {
+            type: "base64",
+            media_type: "image/jpeg",
+            data: imageBase64,
+          },
+        },
+        { type: "text", text: "Your are an expert in image analyzing, espcially in human looking and fashion. Please describe this image in as details as possible in a very fun and positive way to make people happy" },
+      ],
+    });
+
+    // call bedrock to describe the image 
+    desc.innerText = ""
+
+    const response = await fetch(
+      "claude-haiku-image",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ messages: messages })
+      }
+    );
+
+    console.log(response)
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        break;
+      }
+      try {
+        const json = decoder.decode(value);
+        desc.innerText += json;
+        console.log(json);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  })
+
+
+  const main = async () => {
+    await getCamera();
+  };
+
+  main();
+</script>
+
+</html>
