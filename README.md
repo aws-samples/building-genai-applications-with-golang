@@ -32,7 +32,6 @@ Architecture
 This sample application assumes that you already setup
 
 - Permissions to invoke Claude 3 Haiku model on Amazon Bedrock
-- You setup a knowledge base as architecture in RAG section
 - You launch an AWS maanged knowledge base
 - Permissions to invoke Amazon OpenSearch Serverless (AOSS) Collection and the managed knowledge base
 
@@ -79,6 +78,9 @@ main.go implement a http server and route request to handlers. bedrock.go and ao
 ## How to Run
 
 Follow [this official document](https://go.dev/doc/install) to install golang, then run the applicationn as the following
+
+> [!IMPORTANT]  
+> Please install Go version 1.21.5
 
 ```go
 cd developing-genai-applications-with-golang
