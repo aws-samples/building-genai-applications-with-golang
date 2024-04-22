@@ -6,7 +6,28 @@ date: 25/03/2024
 
 # Developing GenAI Applications with Golang
 
-## Prerequisite
+## Introduction
+
+What we often see in production is a variety on languages written in Go, Java, .Net, however the majority of learning material on building GenAI (Generative Artifical Intelligence) apps currently is in Python and JavaScript. This workshop shows how to get started with Amazon Bedrock in Go through implementing few basic examples without using frameworks like Langchain, Streamlit or React.
+
+Examples include:
+
+- Simple chat and prompt
+- Simple image analyser
+- Query vector database
+- Simple RAG (Retrieval Augmented Generation) application
+
+You will implement these features using only basic programing concepts without having to learn a new framework to help you really understand and master fundamental concepts.
+
+- Stream response
+- Message API of Anthropic Claude 3 Model
+- Prompting Claude 3 on Amazon Bedrock
+
+Architecture
+
+![arch](./assets/arch.png)
+
+## Prerequisites
 
 This sample application assumes that you already setup
 
@@ -25,24 +46,8 @@ const KNOWLEDGE_BASE_ID = ""
 const KNOWLEDGE_BASE_MODEL_ID = ""
 const KNOWLEDGE_BASE_NUMBER_OF_RESULT = 6
 const AOSS_ENDPOINT = ""
+const AOSS_NOTE_APP_INDEX_NAME = ""
 ```
-
-## Introduction
-
-What we often see in production is a variety on languages written in Go, Java, .Net, however the majority of learning material on building GenAI (Generative Artifical Intelligence) apps currently is in Python and JavaScript. This workshop shows how to get started with Amazon Bedrock in Go through implementing few basic examples without using frameworks like Langchain, Streamlit or React.
-
-Examples include:
-
-- Simple chat and prompt
-- Simple image analyser
-- Query vector database
-- Simple RAG (Retrieval Augmented Generation) application
-
-You will implement these features using only basic programing concepts without having to learn a new framework to help you really understand and master fundamental concepts.
-
-- Stream response
-- Message API of Anthropic Claude 3 Model
-- Prompting Claude 3 on Amazon Bedrock
 
 ## Application
 
@@ -50,20 +55,20 @@ Project structure
 
 ```go
 |--static
+  |--aoss-index.html
+  |--aoss-query.html
   |--claude-haiku.html
-  |--claude2.html
   |--image.html
-  |--opensearch.html
-  |--rag.html
+  |--retrieve.html
+  |--retrieve-generate.html
 |--bedrock
   |--aoss.go
   |--bedrock.go
   |--constants.go
-  |--rag.go
   |--knowledge-based.go
 |--main.go
-|--build.py
-|--Dockerfile
+|--go.mod
+|--go.sum
 ```
 
 main.go implement a http server and route request to handlers. bedrock.go and aoss.go are functions to invoke Amazon Bedrock and Amazon OpenSearch Serverless (AOSS), respecitively. static folder contains simple frontend with javascript.
@@ -194,17 +199,104 @@ for event := range output.GetStream().Events() {
 }
 ```
 
-## Retrival Augmented Generation
+## Deployment
 
-There are two options to build a RAG application either using AWS managed knowledge base or setting up a knowledge base yourself.
+This workshop does not provide detailed step by step to deploy the application. Instead, it provides overall architecture and a deployment option. It is straightfoward to deploy the application on Amazon ECS.
 
-First option, you can build a knowlege based as the following architecture
+![arch](./assets/deploy-arch.png)
 
-![arch](./assets/arch.png)
+1. Users ask a question.
+2. The Application Load Balancer distributes the request to Amazon ECS tasks.
+3. The ECS tasks query the knowledge base.
+4. The ECS tasks receive vectors and text chunks that are relevant to the user's question.
+5. The ECS tasks build and send the prompt to the Claude 3 Model on Amazon Bedrock.
+6. Amazon Bedrock streams the response to the ECS tasks.
+7. The ECS tasks stream the response to the Application Load Balancer.
+8. The Application Load Balancer forwards the response to the users.
 
-Then we can implement a simple RAG consisting of two basic steps below. Details implementation are shown in rag.go file
+**Dockerfile**
 
-- Get context by query the database vector
-- Based on the context build a prompt to the llm model
+```go
+# syntax=docker/dockerfile:1
 
-Second option, we can easily launch a knowledge base in Amazon Bedrock console, then use the Bedrock agent runtime to call retrieve or retrieve and generate APIs. Details implementation is shown in knowledge-based.go file. Under the hood, AWS creates a vector database upto your choices such as Amazon OpenSearch Serverless (AOSS) or Amazon Aurora (postgresql engine).
+# Build the application from source
+FROM golang:1.21.5 AS build-stage
+
+WORKDIR /app
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY *.go ./
+COPY  bedrock ./bedrock
+
+RUN CGO_ENABLED=0 GOOS=linux go build -o /genaiapp
+
+# Run the tests in the container
+FROM build-stage AS run-test-stage
+
+# Deploy the application binary into a lean image
+FROM gcr.io/distroless/base-debian11 AS build-release-stage
+
+WORKDIR /
+
+COPY --from=build-stage /genai-go-app /genaiapp
+COPY static ./static
+
+EXPOSE 3000
+
+USER nonroot:nonroot
+
+ENTRYPOINT ["/genaiapp"]
+```
+
+**ECS Task Role**
+
+The task role need permissions to
+
+- Invoke Amazon Bedrock Runtime
+- Invoke Amazon Bedrock Agent Runtime
+- Access to Claude 3 and Titan models
+- Upload data to the S3 bucket in knowledge base
+- Access the AOSS collection
+
+Here is a sample of IAM policy attached to the task role
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "bedrock:InvokeModel",
+        "bedrock:InvokeModelWithResponseStream",
+        "bedrock:InvokeAgent"
+      ],
+      "Resource": [
+        "arn:aws:bedrock:<REGION>::foundation-model/anthropic.claude-3-haiku-20240307-v1:0",
+        "arn:aws:bedrock:<REGION>::foundation-model/amazon.titan-embed-text-v1"
+      ],
+      "Effect": "Allow"
+    },
+    {
+      "Action": ["s3:GetObject", "s3:PutObject"],
+      "Resource": [
+        "arn:aws:s3:::<BUCKET_NAME>",
+        "arn:aws:s3:::<BUCKET_NAME>/*"
+      ],
+      "Effect": "Allow"
+    },
+    {
+      "Action": "aoss:APIAccessAll",
+      "Resource": [
+        "arn:aws:aoss:<REGION>:<ACCOUNT_ID>:collection/<COLLECTION_ID>"
+      ],
+      "Effect": "Allow"
+    }
+  ]
+}
+```
+
+**AOSS Data Access Policy**
+
+To allow the task role to access the AOSS collection, we need to update the Access Policy of the collection.
