@@ -5,7 +5,7 @@
 package bedrock
 
 const BEDROCK_REGION = "us-west-2"
-const AOSS_REGION = "us-east-1"
+const AOSS_REGION = "us-west-2"
 const KNOWLEDGE_BASE_REGION = "us-west-2"
 const KNOWLEDGE_BASE_ID = "X3CHIODXQZ"
 const KNOWLEDGE_BASE_MODEL_ID = "anthropic.claude-3-haiku-20240307-v1:0"
