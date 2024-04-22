@@ -203,7 +203,7 @@ for event := range output.GetStream().Events() {
 
 This workshop does not provide detailed step by step to deploy the application. Instead, it provides overall architecture and a deployment option. It is straightfoward to deploy the application on Amazon ECS.
 
-![arch](./assets/deploy-arch.png)
+![arch](./assets/arch-deploy.png)
 
 1. Users ask a question.
 2. The Application Load Balancer distributes the request to Amazon ECS tasks.
