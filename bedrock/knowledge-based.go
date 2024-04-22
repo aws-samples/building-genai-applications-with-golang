@@ -39,8 +39,6 @@ func HandleRetrieve(w http.ResponseWriter, r *http.Request, client *bedrockagent
 
 	messages := request.Messages
 
-	fmt.Println(messages)
-
 	// pop the last message as user question
 	userQuestion := messages[len(messages)-1].Content[0].Text
 
@@ -64,21 +62,11 @@ func HandleRetrieve(w http.ResponseWriter, r *http.Request, client *bedrockagent
 		fmt.Println(error)
 	}
 
-	// for k, v := range output.RetrievalResults {
-	// 	fmt.Println(k)
-	// 	fmt.Println("=======================================")
-	// 	fmt.Println(*v.Content.Text)
-	// }
-
-	// parse output to []byte and return client
-	// outputJson, error := json.Marshal(output)
-
 	if error != nil {
 		fmt.Println(error)
 	}
 
 	json.NewEncoder(w).Encode(output)
-
 }
 
 func HandleRetrieveAndGenerate(w http.ResponseWriter, r *http.Request, client *bedrockagentruntime.Client) {
@@ -106,8 +94,6 @@ func HandleRetrieveAndGenerate(w http.ResponseWriter, r *http.Request, client *b
 
 	messages := request.Messages
 
-	fmt.Println(messages)
-
 	// pop the last message as user question
 	userQuestion := messages[len(messages)-1].Content[0].Text
 
@@ -132,15 +118,6 @@ func HandleRetrieveAndGenerate(w http.ResponseWriter, r *http.Request, client *b
 			},
 		},
 	)
-
-	if error != nil {
-		fmt.Println(error)
-	}
-
-	fmt.Println(*output.Output.Text)
-
-	// parse output to []byte
-	// outputJson, error := json.Marshal(output)
 
 	if error != nil {
 		fmt.Println(error)

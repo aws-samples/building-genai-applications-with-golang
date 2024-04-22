@@ -8,8 +8,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"html/template"
+	"net/http"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
@@ -51,16 +51,6 @@ type ResponseClaude3 struct {
 	Delta Delta  `json:"delta"`
 }
 
-// claude2 data type
-type Request struct {
-	Prompt            string   `json:"prompt"`
-	MaxTokensToSample int      `json:"max_tokens_to_sample"`
-	Temperature       float64  `json:"temperature,omitempty"`
-	TopP              float64  `json:"top_p,omitempty"`
-	TopK              int      `json:"top_k,omitempty"`
-	StopSequences     []string `json:"stop_sequences,omitempty"`
-}
-
 type Response struct {
 	Completion string `json:"completion"`
 }
@@ -69,85 +59,6 @@ type HelloHandler struct{}
 
 type Query struct {
 	Topic string `json:"topic"`
-}
-
-func HandleBedrockClaude2Chat(w http.ResponseWriter, r *http.Request, BedrockClient *bedrockruntime.Client) {
-
-	const claudePromptFormat = "\n\nHuman: %s\n\nAssistant:"
-
-	var query Query
-	var message string
-
-	// parse mesage from request
-	error := json.NewDecoder(r.Body).Decode(&query)
-
-	if error != nil {
-		message = "how to learn japanese as quick as possible?"
-		panic(error)
-	}
-
-	message = query.Topic
-
-	fmt.Println(message)
-
-	prompt := "" + fmt.Sprintf(claudePromptFormat, message)
-
-	payload := Request{
-		Prompt:            prompt,
-		MaxTokensToSample: 2048,
-	}
-
-	payloadBytes, error := json.Marshal(payload)
-
-	if error != nil {
-		fmt.Println(error)
-	}
-
-	output, error := BedrockClient.InvokeModelWithResponseStream(
-		context.Background(),
-		&bedrockruntime.InvokeModelWithResponseStreamInput{
-			Body:        payloadBytes,
-			ModelId:     aws.String("anthropic.claude-v2"),
-			ContentType: aws.String("application/json"),
-		},
-	)
-
-	if error != nil {
-		fmt.Println(error)
-	}
-
-	for event := range output.GetStream().Events() {
-		switch v := event.(type) {
-		case *types.ResponseStreamMemberChunk:
-
-			//fmt.Println("payload", string(v.Value.Bytes))
-			var resp Response
-			err := json.NewDecoder(bytes.NewReader(v.Value.Bytes)).Decode(&resp)
-			if err != nil {
-				fmt.Println(err)
-			}
-
-			// stream to client
-			fmt.Println(resp.Completion)
-			var tpl = template.Must(template.New("tpl").Parse(resp.Completion))
-			tpl.Execute(w, nil)
-
-			// another way and client parse it
-			// json.NewEncoder(w).Encode(resp)
-
-			if f, ok := w.(http.Flusher); ok {
-				f.Flush()
-			} else {
-				fmt.Println("Damn, no flush")
-			}
-
-		case *types.UnknownUnionMember:
-			fmt.Println("unknown tag:", v.Tag)
-
-		default:
-			fmt.Println("union is nil or unknown type")
-		}
-	}
 }
 
 func HandleBedrockClaude3HaikuChat(w http.ResponseWriter, r *http.Request, BedrockClient *bedrockruntime.Client) {
@@ -197,8 +108,6 @@ func HandleBedrockClaude3HaikuChat(w http.ResponseWriter, r *http.Request, Bedro
 		switch v := event.(type) {
 		case *types.ResponseStreamMemberChunk:
 
-			//fmt.Println("payload", string(v.Value.Bytes))
-
 			var resp ResponseClaude3
 			err := json.NewDecoder(bytes.NewReader(v.Value.Bytes)).Decode(&resp)
 			if err != nil {
@@ -229,10 +138,6 @@ func HandleBedrockClaude3HaikuChat(w http.ResponseWriter, r *http.Request, Bedro
 
 func HandleHaikuImageAnalyzer(w http.ResponseWriter, r *http.Request, BedrockClient *bedrockruntime.Client) {
 
-	// allow cros
-	// w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	// w.Header().Set("Access-Control-Allow-Origin", "*")
-
 	// data type request
 	type Message struct {
 		Role    string        `json:"role"`
@@ -250,16 +155,6 @@ func HandleHaikuImageAnalyzer(w http.ResponseWriter, r *http.Request, BedrockCli
 		Messages          []Message `json:"messages"`
 	}
 
-	// data type response
-	// type ResponseContent struct {
-	// 	Type string `json:"type"`
-	// 	Text string `json:"text"`
-	// }
-
-	// type Response struct {
-	// 	Content []ResponseContent `json:"content"`
-	// }
-
 	// parse request
 	var request Request
 	error := json.NewDecoder(r.Body).Decode(&request)
@@ -267,8 +162,6 @@ func HandleHaikuImageAnalyzer(w http.ResponseWriter, r *http.Request, BedrockCli
 	if error != nil {
 		panic(error)
 	}
-
-	// fmt.Println(request)
 
 	// payload for bedrock claude3 haikue
 	messages := request.Messages
@@ -287,8 +180,6 @@ func HandleHaikuImageAnalyzer(w http.ResponseWriter, r *http.Request, BedrockCli
 		fmt.Println(error)
 	}
 
-	// fmt.Println("invoke bedrock ...")
-
 	// invoke bedrock claude3 haiku
 	output, error := BedrockClient.InvokeModelWithResponseStream(
 		context.Background(),
@@ -300,11 +191,6 @@ func HandleHaikuImageAnalyzer(w http.ResponseWriter, r *http.Request, BedrockCli
 		},
 	)
 
-	// response
-	// var response Response
-	// json.NewDecoder(bytes.NewReader(output.Body)).Decode(&response)
-	// fmt.Println(response)
-
 	if error != nil {
 		fmt.Println(error)
 	}
@@ -312,12 +198,8 @@ func HandleHaikuImageAnalyzer(w http.ResponseWriter, r *http.Request, BedrockCli
 	// stream result to client
 	for event := range output.GetStream().Events() {
 
-		// fmt.Println(event)
-
 		switch v := event.(type) {
 		case *types.ResponseStreamMemberChunk:
-
-			// fmt.Println("payload", string(v.Value.Bytes))
 
 			var resp ResponseClaude3
 			err := json.NewDecoder(bytes.NewReader(v.Value.Bytes)).Decode(&resp)

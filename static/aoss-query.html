@@ -86,67 +86,70 @@
       <form id="form" onkeydown="return event.key != 'Enter';" class="form">
         <div class="container-input">
           <input class="text-input" type="text" id="text-input" />
-          <button id="submit" class="button">Rag</button>
+          <button id="submit" class="button">Query</button>
         </div>
       </form>
-      <div>
-        <p id="model-answer" class="text-model"></p>
-      </div>
+      <div id="list" class="text-model"></div>
     </div>
     <script>
-      // conversation turns
-      let messages = [];
+      // Get the list container element
+      var listContainer = document.getElementById("list");
 
       // get html component for model answer
       const modelAnswer = document.getElementById("model-answer");
 
-      const callBedrockStream = async () => {
-        // present model answer to frontend
-        modelAnswer.innerText = "";
+      const queryOpenSearchByTitle = async () => {
+        // clear content before query
+        listContainer.innerHTML = "";
 
         // get user question
         const userQuestion = document.getElementById("text-input").value;
 
-        // push user question to messages
-        messages.push({
-          role: "user",
-          content: [{ type: "text", text: userQuestion }],
-        });
+        try {
+          const response = await fetch("/aoss-query-backend", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ query: userQuestion }),
+          });
 
-        if (userQuestion) {
-          try {
-            const response = await fetch("/rag-query", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ messages: messages }),
-            });
+          const json = await response.json();
+          const items = JSON.parse(json.Result).hits.hits;
 
-            console.log(response);
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
+          console.log(items);
 
-            while (true) {
-              const { done, value } = await reader.read();
-              if (done) {
-                break;
-              }
-              const text = decoder.decode(value);
-              console.log(text);
-              modelAnswer.innerText += text;
-            }
+          // Loop through the items array and create list items (<li>)
+          for (var i = 0; i < items.length; i++) {
+            var listItem = document.createElement("div");
+            listItem.style.marginBottom = "15px";
+            listItem.style.borderBottom = "1px solid #0000FF";
 
-            // push model answer to converstion turn
-            messages.push({
-              role: "assistant",
-              content: [{ type: "text", text: modelAnswer.innerText }],
-            });
-          } catch (error) {
-            console.log(error);
+            var header = document.createElement("h4");
+            header.textContent = `Document ${i}`;
+
+            var link = document.createElement("a");
+            link.href = items[i]._source.link;
+            link.innerHTML = items[i]._source.link;
+
+            console.log(items[i]._source.link);
+
+            var itemText = document.createTextNode(
+              "id: " +
+                items[i]._id +
+                " title: " +
+                JSON.stringify(items[i]._source.title) +
+                " text: " +
+                JSON.stringify(items[i]._source.text)
+            );
+
+            listItem.appendChild(header);
+            listItem.appendChild(link);
+            listItem.appendChild(itemText);
+            listContainer.appendChild(listItem);
           }
-        } else {
-          console.log("Please enter question ...");
+        } catch (error) {
+          console.log(error);
         }
       };
 
@@ -154,14 +157,14 @@
         .getElementById("submit")
         .addEventListener("click", async (event) => {
           event.preventDefault();
-          await callBedrockStream();
+          await queryOpenSearchByTitle();
         });
 
       document
         .getElementById("text-input")
         .addEventListener("keydown", async (event) => {
           if (event.code === "Enter") {
-            await callBedrockStream();
+            await queryOpenSearchByTitle();
           }
         });
     </script>
