@@ -25,7 +25,7 @@ You will implement these features using only basic programing concepts without h
 
 Architecture
 
-![arch](./assets/arch.png)
+![arch](./assets/arch-cloud9.png)
 
 ## Prerequisites
 
