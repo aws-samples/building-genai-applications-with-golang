@@ -7,9 +7,9 @@ import (
 	"context"
 	gobedrock "entest/gobedrock/bedrock"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
-	"html/template"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -102,16 +102,6 @@ func main() {
 		gobedrock.HandleHaikuImageAnalyzer(w, r, BedrockClient)
 	})
 
-	// frontend claude2
-	mux.HandleFunc("/claude2", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "./static/claude2.html")
-	})
-
-	// backend claude2
-	mux.HandleFunc("/bedrock-stream", func(w http.ResponseWriter, r *http.Request) {
-		gobedrock.HandleBedrockClaude2Chat(w, r, BedrockClient)
-	})
-
 	// handle aoss frontend
 	mux.HandleFunc("/aoss", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
@@ -126,21 +116,6 @@ func main() {
 		if r.Method == "GET" {
 			http.ServeFile(w, r, "./static/opensearch.html")
 		}
-	})
-
-	// handle query to aoss
-	mux.HandleFunc("/query", func(w http.ResponseWriter, r *http.Request) {
-		gobedrock.HandleAOSSQuery(w, r, AOSSClient, BedrockClient)
-	})
-
-	// frontend for rag
-	mux.HandleFunc("/rag", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "./static/rag.html")
-	})
-
-	// backend for rag
-	mux.HandleFunc("/rag-query", func(w http.ResponseWriter, r *http.Request) {
-		gobedrock.HandleRagQueryClaude3(w, r, BedrockClient, AOSSClient)
 	})
 
 	// magic mirror frontend
@@ -166,6 +141,32 @@ func main() {
 	// knowledge based retrieve backend
 	mux.HandleFunc("/knowledge-base-retrieve-and-generate", func(w http.ResponseWriter, r *http.Request) {
 		gobedrock.HandleRetrieveAndGenerate(w, r, BedrockAgentRuntimeClient)
+	})
+
+	// handle aoss index frontend
+	mux.HandleFunc("/aoss-index", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./static/aoss-index.html")
+	})
+
+	// handle index to aoss
+	mux.HandleFunc("/aoss-index-backend", func(w http.ResponseWriter, r *http.Request) {
+
+		if r.Method == "POST" {
+			gobedrock.HandleAOSSIndex(w, r, AOSSClient, BedrockClient)
+		}
+
+	})
+
+	// handle aoss query frontend
+	mux.HandleFunc("/aoss-query", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./static/aoss-query.html")
+	})
+
+	// handle query to aoss
+	mux.HandleFunc("/aoss-query-backend", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "POST" {
+			gobedrock.HandleAOSSQueryByTitle(w, r, AOSSClient, BedrockClient)
+		}
 	})
 
 	// allow cors

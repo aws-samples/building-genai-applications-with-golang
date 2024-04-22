@@ -115,7 +115,7 @@ func HandleBedrockClaude3HaikuChat(w http.ResponseWriter, r *http.Request, Bedro
 			}
 
 			// stream to client
-			fmt.Println(resp.Delta.Text)
+			// fmt.Println(resp.Delta.Text)
 			var tpl = template.Must(template.New("tpl").Parse(resp.Delta.Text))
 			tpl.Execute(w, nil)
 			// another way and client parse it
@@ -208,7 +208,7 @@ func HandleHaikuImageAnalyzer(w http.ResponseWriter, r *http.Request, BedrockCli
 			}
 
 			// stream to client
-			fmt.Println(resp.Delta.Text)
+			// fmt.Println(resp.Delta.Text)
 			var tpl = template.Must(template.New("tpl").Parse(resp.Delta.Text))
 			tpl.Execute(w, nil)
 			// another way and client parse it
