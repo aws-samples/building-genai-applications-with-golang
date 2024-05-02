@@ -84,7 +84,6 @@ func main() {
 
 	// frontend claude haiku
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-
 		content, error := os.ReadFile("./static/claude-haiku.html")
 		if error != nil {
 			fmt.Println(error)
@@ -94,12 +93,13 @@ func main() {
 
 	// backend claude haiku
 	mux.HandleFunc("/bedrock-haiku", func(w http.ResponseWriter, r *http.Request) {
-		gobedrock.HandleBedrockClaude3HaikuChat(w, r, BedrockClient)
+		if r.Method == "POST" {
+			gobedrock.HandleBedrockClaude3HaikuChat(w, r, BedrockClient)
+		}
 	})
 
 	// bedrock frontend for image analyzer
 	mux.HandleFunc("/image", func(w http.ResponseWriter, r *http.Request) {
-
 		content, error := os.ReadFile("./static/image.html")
 		if error != nil {
 			fmt.Println(error)
@@ -109,7 +109,9 @@ func main() {
 
 	// bedrock backend to analyze image
 	mux.HandleFunc("/claude-haiku-image", func(w http.ResponseWriter, r *http.Request) {
-		gobedrock.HandleHaikuImageAnalyzer(w, r, BedrockClient)
+		if r.Method == "POST" {
+			gobedrock.HandleHaikuImageAnalyzer(w, r, BedrockClient)
+		}
 	})
 
 	// magic mirror frontend
@@ -132,12 +134,13 @@ func main() {
 
 	// knowledge based retrieve backend
 	mux.HandleFunc("/knowledge-base-retrieve", func(w http.ResponseWriter, r *http.Request) {
-		gobedrock.HandleRetrieve(w, r, BedrockAgentRuntimeClient)
+		if r.Method == "POST" {
+			gobedrock.HandleRetrieve(w, r, BedrockAgentRuntimeClient)
+		}
 	})
 
 	// knowledge based retrieve frontend
 	mux.HandleFunc("/retrieve-generate", func(w http.ResponseWriter, r *http.Request) {
-
 		content, error := os.ReadFile("./static/retrieve-and-generate.html")
 		if error != nil {
 			fmt.Println(error)
@@ -148,12 +151,13 @@ func main() {
 
 	// knowledge based retrieve backend
 	mux.HandleFunc("/knowledge-base-retrieve-and-generate", func(w http.ResponseWriter, r *http.Request) {
-		gobedrock.HandleRetrieveAndGenerate(w, r, BedrockAgentRuntimeClient)
+		if r.Method == "POST" {
+			gobedrock.HandleRetrieveAndGenerate(w, r, BedrockAgentRuntimeClient)
+		}
 	})
 
 	// handle aoss index frontend
 	mux.HandleFunc("/aoss-index", func(w http.ResponseWriter, r *http.Request) {
-
 		content, error := os.ReadFile("./static/aoss-index.html")
 		if error != nil {
 			fmt.Println(error)
@@ -164,7 +168,6 @@ func main() {
 
 	// handle index to aoss
 	mux.HandleFunc("/aoss-index-backend", func(w http.ResponseWriter, r *http.Request) {
-
 		if r.Method == "POST" {
 			gobedrock.HandleAOSSIndex(w, r, AOSSClient, BedrockClient)
 		}
@@ -173,7 +176,6 @@ func main() {
 
 	// handle aoss query frontend
 	mux.HandleFunc("/aoss-query", func(w http.ResponseWriter, r *http.Request) {
-
 		content, error := os.ReadFile("./static/aoss-query.html")
 		if error != nil {
 			fmt.Println(error)
@@ -182,7 +184,7 @@ func main() {
 
 	})
 
-	// handle query to aoss backend 
+	// handle query to aoss backend
 	mux.HandleFunc("/aoss-query-backend", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
 			gobedrock.HandleAOSSQueryByTitle(w, r, AOSSClient, BedrockClient)
