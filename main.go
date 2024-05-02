@@ -182,7 +182,7 @@ func main() {
 
 	})
 
-	// handle query to aoss
+	// handle query to aoss backend 
 	mux.HandleFunc("/aoss-query-backend", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
 			gobedrock.HandleAOSSQueryByTitle(w, r, AOSSClient, BedrockClient)
