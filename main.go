@@ -7,9 +7,9 @@ import (
 	"context"
 	gobedrock "entest/gobedrock/bedrock"
 	"fmt"
-	"html/template"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -84,7 +84,12 @@ func main() {
 
 	// frontend claude haiku
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "./static/claude-haiku.html")
+
+		content, error := os.ReadFile("./static/claude-haiku.html")
+		if error != nil {
+			fmt.Println(error)
+		}
+		w.Write(content)
 	})
 
 	// backend claude haiku
@@ -94,7 +99,12 @@ func main() {
 
 	// bedrock frontend for image analyzer
 	mux.HandleFunc("/image", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "./static/image.html")
+
+		content, error := os.ReadFile("./static/image.html")
+		if error != nil {
+			fmt.Println(error)
+		}
+		w.Write(content)
 	})
 
 	// bedrock backend to analyze image
@@ -102,30 +112,22 @@ func main() {
 		gobedrock.HandleHaikuImageAnalyzer(w, r, BedrockClient)
 	})
 
-	// handle aoss frontend
-	mux.HandleFunc("/aoss", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "POST" {
-			r.ParseForm()
-			name := r.FormValue("name")
-			var tpl = template.Must(template.New("tpl").Parse(name))
-			tpl.Execute(w, nil)
-			// another way and client parse it
-			// json.NewEncoder(w).Encode(resp)
-		}
-
-		if r.Method == "GET" {
-			http.ServeFile(w, r, "./static/opensearch.html")
-		}
-	})
-
 	// magic mirror frontend
 	mux.HandleFunc("/mirror", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "./static/mirror.html")
+		content, error := os.ReadFile("./static/mirror.html")
+		if error != nil {
+			fmt.Println(error)
+		}
+		w.Write(content)
 	})
 
 	// knowledge based retrieve frontend
 	mux.HandleFunc("/retrieve", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "./static/retrieve.html")
+		content, error := os.ReadFile("./static/retrieve.html")
+		if error != nil {
+			fmt.Println(error)
+		}
+		w.Write(content)
 	})
 
 	// knowledge based retrieve backend
@@ -135,7 +137,13 @@ func main() {
 
 	// knowledge based retrieve frontend
 	mux.HandleFunc("/retrieve-generate", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "./static/retrieve-and-generate.html")
+
+		content, error := os.ReadFile("./static/retrieve-and-generate.html")
+		if error != nil {
+			fmt.Println(error)
+		}
+		w.Write(content)
+
 	})
 
 	// knowledge based retrieve backend
@@ -145,7 +153,13 @@ func main() {
 
 	// handle aoss index frontend
 	mux.HandleFunc("/aoss-index", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "./static/aoss-index.html")
+
+		content, error := os.ReadFile("./static/aoss-index.html")
+		if error != nil {
+			fmt.Println(error)
+		}
+		w.Write(content)
+
 	})
 
 	// handle index to aoss
@@ -159,7 +173,13 @@ func main() {
 
 	// handle aoss query frontend
 	mux.HandleFunc("/aoss-query", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "./static/aoss-query.html")
+
+		content, error := os.ReadFile("./static/aoss-query.html")
+		if error != nil {
+			fmt.Println(error)
+		}
+		w.Write(content)
+
 	})
 
 	// handle query to aoss
