@@ -8,7 +8,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/bedrockagentruntime v1.6.1
 	github.com/aws/aws-sdk-go-v2/service/bedrockruntime v1.7.3
 	github.com/opensearch-project/opensearch-go/v2 v2.3.0
-	github.com/rs/cors v1.10.1
+	github.com/rs/cors v1.11.0
 )
 
 require (
