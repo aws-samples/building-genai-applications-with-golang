@@ -263,7 +263,7 @@ func IndexVectorOpenSearch(AOSSClient *opensearch.Client, BedrockClient *bedrock
 	}`, item.Title, item.Link, item.Text, vecStr))
 
 	index := opensearchapi.IndexRequest{
-		Index: "note",
+		Index: AOSS_NOTE_APP_INDEX_NAME,
 		Body:  body,
 	}
 
