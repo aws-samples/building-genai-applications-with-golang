@@ -196,7 +196,7 @@ func main() {
 
 	// create a http server using http
 	server := http.Server{
-		Addr:           ":8080",
+		Addr:           ":3000",
 		Handler:        handler,
 		ReadTimeout:    30 * time.Second,
 		WriteTimeout:   30 * time.Second,
