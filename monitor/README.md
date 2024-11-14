@@ -25,7 +25,7 @@ Dashboard to monitor performance of Amazon Claude 3.5 Sonnet.
 
 
 Dashboard to monitor performance of Amazon Claude 3.0 Haiku. 
-![dashboard-claude-3.5-sonnet](./../assets/dashboard-claude-30-Haiku.png)
+![dashboard-claude-3.5-sonnet](./../assets/dashboard-claude-30-haiku.png)
 
 ## Simple Load Test
 
