@@ -1,0 +1,42 @@
+AWSTemplateFormatVersion: '2010-09-09'
+#------------------------------------------------------
+# Parameters
+#------------------------------------------------------
+Parameters:
+  ClusterName:
+    Type: String
+    Description: ImageId to be used to create an EC2 instance.
+    Default: demo
+#------------------------------------------------------
+# Resources: ecs cluster
+#------------------------------------------------------
+Resources:
+  ecscluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Ref ClusterName
+      ClusterSettings:
+        - Name: containerInsights
+          Value: enabled
+      CapacityProviders:
+        - FARGATE
+        - FARGATE_SPOT
+      DefaultCapacityProviderStrategy:
+        - CapacityProvider: FARGATE
+          Weight: 4
+          Base: 1
+        - CapacityProvider: FARGATE_SPOT
+          Weight: 1
+          Base: 0
+#------------------------------------------------------
+# Outputs
+#------------------------------------------------------
+Outputs:
+  ecscluster:
+    Value: !Ref ecscluster
+    Export:
+      Name: !Sub ${AWS::StackName}-ecscluster
+  ecsclusterArn:
+    Value: !Ref ecscluster
+    Export:
+      Name: !Sub ${AWS::StackName}-ecsclusterArn

@@ -1,0 +1,90 @@
+AWSTemplateFormatVersion: "2010-09-09"
+#------------------------------------------------------
+# Parameters
+#------------------------------------------------------
+Parameters:
+  NetworkStackName:
+    Description: Stack name of the network stack
+    Type: String
+    Default: cfn-network
+
+#------------------------------------------------------
+# Resources: load balancer, target group, listener 
+#------------------------------------------------------
+Resources:
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W52
+            reason: "no need log enable for demo"
+    Properties:
+      Subnets:
+        - Fn::ImportValue: !Sub ${NetworkStackName}-public-subnet-1
+        - Fn::ImportValue: !Sub ${NetworkStackName}-public-subnet-2
+      SecurityGroups:
+        - Fn::ImportValue: !Sub ${NetworkStackName}-alb-sg
+
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      VpcId:
+        Fn::ImportValue: !Sub ${NetworkStackName}-vpc
+      Port: 80
+      Protocol: HTTP
+      TargetType: ip
+      Matcher:
+        HttpCode: 200-299
+      HealthCheckIntervalSeconds: 10
+      HealthCheckPath: /
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+
+  Listener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W56
+            reason: "enable http only for demo"
+    Properties:
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroup
+  ListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W91
+            reason: "no need condition for demo"
+    Properties:
+      ListenerArn: !Ref Listener
+      Priority: 1
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroup
+      Conditions:
+        - Field: path-pattern
+          Values:
+            - /bedrock
+
+#------------------------------------------------------
+# Outputs 
+#------------------------------------------------------
+Outputs:
+  LoadBalancer:
+    Description: Load balancer
+    Value: !Ref LoadBalancer
+    Export:
+      Name: !Sub ${AWS::StackName}-load-balancer
+  TargetGroup:
+    Description: Target group
+    Value: !Ref TargetGroup
+    Export:
+      Name: !Sub ${AWS::StackName}-target-group
