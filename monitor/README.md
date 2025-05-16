@@ -20,11 +20,10 @@ Run the following script to create the dashboard. Please update <DASHBOARD_NAME>
 python create-dashboard.py
 ```
 
-Dashboard to monitor performance of Amazon Claude 3.5 Sonnet. 
+Dashboard to monitor performance of Amazon Claude 3.5 Sonnet.
 ![dashboard-claude-3.5-sonnet](./../assets/dashboard-claude-35-sonnet.png)
 
-
-Dashboard to monitor performance of Amazon Claude 3.0 Haiku. 
+Dashboard to monitor performance of Amazon Claude 3.0 Haiku.
 ![dashboard-claude-3.5-sonnet](./../assets/dashboard-claude-30-haiku.png)
 
 ## Simple Load Test
@@ -39,3 +38,37 @@ Run the load test script and monitor the created dashboard above.
 ```bash
 python simple-load-test.py
 ```
+
+## CloudWatch LogInsights Query
+
+```sql
+--
+fields @timestamp, modelId, requestId, accountId, inferenceRegion,errorCode, @message
+| filter errorCode = "ThrottlingException"
+| sort @timestamp desc
+| limit 10000
+
+
+--
+fields @timestamp, errorCode, modelId, requestId, accountId, inferenceRegion, @message
+| filter @message like /ThrottlingException/
+| sort @timestamp desc
+| limit 10000
+
+
+--
+fields @timestamp, modelId, requestId, accountId, inferenceRegion, output.outputBodyJson.metrics.latencyMs as latency, input.inputTokenCount, output.outputBodyJson.usage.outputTokens, @message
+| filter ispresent(output.outputBodyJson.metrics.latencyMs)
+| sort latency desc
+| limit 10000
+```
+
+## Reference
+
+[https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/bedrock-runtime/client/converse.html](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/bedrock-runtime/client/converse.html)
+
+[https://aws.amazon.com/blogs/mt/monitoring-generative-ai-applications-using-amazon-bedrock-and-amazon-cloudwatch-integration/](https://aws.amazon.com/blogs/mt/monitoring-generative-ai-applications-using-amazon-bedrock-and-amazon-cloudwatch-integration/)
+
+[https://aws.amazon.com/blogs/aws/reduce-costs-and-latency-with-amazon-bedrock-intelligent-prompt-routing-and-prompt-caching-preview/](https://aws.amazon.com/blogs/aws/reduce-costs-and-latency-with-amazon-bedrock-intelligent-prompt-routing-and-prompt-caching-preview/)
+
+[https://aws.amazon.com/blogs/machine-learning/optimizing-ai-responsiveness-a-practical-guide-to-amazon-bedrock-latency-optimized-inference/](https://aws.amazon.com/blogs/machine-learning/optimizing-ai-responsiveness-a-practical-guide-to-amazon-bedrock-latency-optimized-inference/)
