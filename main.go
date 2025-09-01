@@ -98,31 +98,6 @@ func main() {
 		}
 	})
 
-	// bedrock frontend for image analyzer
-	mux.HandleFunc("/image", func(w http.ResponseWriter, r *http.Request) {
-		content, error := os.ReadFile("./static/image.html")
-		if error != nil {
-			fmt.Println(error)
-		}
-		w.Write(content)
-	})
-
-	// bedrock backend to analyze image
-	mux.HandleFunc("/claude-haiku-image", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "POST" {
-			gobedrock.HandleHaikuImageAnalyzer(w, r, BedrockClient)
-		}
-	})
-
-	// magic mirror frontend
-	mux.HandleFunc("/mirror", func(w http.ResponseWriter, r *http.Request) {
-		content, error := os.ReadFile("./static/mirror.html")
-		if error != nil {
-			fmt.Println(error)
-		}
-		w.Write(content)
-	})
-
 	// knowledge based retrieve frontend
 	mux.HandleFunc("/retrieve", func(w http.ResponseWriter, r *http.Request) {
 		content, error := os.ReadFile("./static/retrieve.html")
