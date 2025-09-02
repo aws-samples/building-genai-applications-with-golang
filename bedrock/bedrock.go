@@ -10,17 +10,11 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
-	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime/types"
 )
-
-// Global Claude model parameters
-const MAX_TOKENS_TO_SAMPLE = 2048
-const ANTHROPIC_VERSION = "bedrock-2023-05-31"
-const TEMPERATURE = 0.9
 
 // claude3 request data type
 type Content struct {
@@ -57,17 +51,15 @@ type ResponseClaude3 struct {
 	Delta Delta  `json:"delta"`
 }
 
+type Response struct {
+	Completion string `json:"completion"`
+}
 
+type Query struct {
+	Topic string `json:"topic"`
+}
 
 func HandleBedrockClaude3HaikuChat(w http.ResponseWriter, r *http.Request, BedrockClient *bedrockruntime.Client) {
-	// Start monitoring: capture request start time for total latency calculation
-	startTime := time.Now()
-	// Generate unique request ID using nanosecond timestamp for log correlation
-	requestID := fmt.Sprintf("req_%d", time.Now().UnixNano())
-	
-	// Log request start in JSON format for CloudWatch Insights parsing
-	fmt.Printf(`{"timestamp":"%s","request_id":"%s","event":"bedrock_request_start","model_id":"%s"}%s`, 
-		time.Now().UTC().Format(time.RFC3339), requestID, MODEL_ID, "\n")
 
 	// list of messages sent from frontend client
 	var request FrontEndRequest
@@ -76,9 +68,6 @@ func HandleBedrockClaude3HaikuChat(w http.ResponseWriter, r *http.Request, Bedro
 	error := json.NewDecoder(r.Body).Decode(&request)
 
 	if error != nil {
-		// Log parsing errors with request context for debugging
-		fmt.Printf(`{"timestamp":"%s","request_id":"%s","event":"request_parse_error","model_id":"%s","error":"%s"}%s`, 
-			time.Now().UTC().Format(time.RFC3339), requestID, MODEL_ID, error.Error(), "\n")
 		panic(error)
 	}
 
@@ -87,9 +76,9 @@ func HandleBedrockClaude3HaikuChat(w http.ResponseWriter, r *http.Request, Bedro
 	fmt.Println(messages)
 
 	payload := RequestBodyClaude3{
-		MaxTokensToSample: MAX_TOKENS_TO_SAMPLE,
-		AnthropicVersion:  ANTHROPIC_VERSION,
-		Temperature:       TEMPERATURE,
+		MaxTokensToSample: 2048,
+		AnthropicVersion:  "bedrock-2023-05-31",
+		Temperature:       0.9,
 		Messages:          messages,
 	}
 
@@ -99,32 +88,19 @@ func HandleBedrockClaude3HaikuChat(w http.ResponseWriter, r *http.Request, Bedro
 		fmt.Println(error)
 	}
 
-	// Start timing Bedrock API call specifically (separate from total request time)
-	bedrockStartTime := time.Now()
 	output, error := BedrockClient.InvokeModelWithResponseStream(
 		context.Background(),
 		&bedrockruntime.InvokeModelWithResponseStreamInput{
 			Body:        payloadBytes,
-			ModelId:     aws.String(MODEL_ID),
+			ModelId:     aws.String("anthropic.claude-3-haiku-20240307-v1:0"),
 			ContentType: aws.String("application/json"),
 			Accept:      aws.String("application/json"),
 		},
 	)
 
 	if error != nil {
-		// Log Bedrock API errors with latency - captures throttling, quota exceeded, etc.
-		fmt.Printf(`{"timestamp":"%s","request_id":"%s","event":"bedrock_error","model_id":"%s","error":"%s","latency_ms":%d}%s`, 
-			time.Now().UTC().Format(time.RFC3339), requestID, MODEL_ID, error.Error(), 
-			time.Since(bedrockStartTime).Milliseconds(), "\n")
 		fmt.Println(error)
-		return
 	}
-
-	// Log successful Bedrock API response with time to first byte (TTFB)
-	// This measures how long it took Bedrock to start streaming the response
-	fmt.Printf(`{"timestamp":"%s","request_id":"%s","event":"bedrock_stream_start","model_id":"%s","latency_ms":%d}%s`, 
-		time.Now().UTC().Format(time.RFC3339), requestID, MODEL_ID,
-		time.Since(bedrockStartTime).Milliseconds(), "\n")
 
 	for event := range output.GetStream().Events() {
 		switch v := event.(type) {
@@ -156,12 +132,4 @@ func HandleBedrockClaude3HaikuChat(w http.ResponseWriter, r *http.Request, Bedro
 			fmt.Println("union is nil or unknown type")
 		}
 	}
-
-	// Log request completion with total end-to-end latency
-	// This includes request parsing + Bedrock API call + response streaming
-	fmt.Printf(`{"timestamp":"%s","request_id":"%s","event":"request_complete","model_id":"%s","total_latency_ms":%d}%s`, 
-		time.Now().UTC().Format(time.RFC3339), requestID, MODEL_ID,
-		time.Since(startTime).Milliseconds(), "\n")
 }
-
-
