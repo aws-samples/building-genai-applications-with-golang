@@ -78,6 +78,9 @@ func init() {
 }
 
 func main() {
+	// Initialize X-Ray SDK
+	fmt.Println("init and create an opensearch client")
+	gobedrock.InitializeXRay()
 
 	// create handler multiplexer
 	mux := http.NewServeMux()
@@ -178,6 +181,7 @@ func main() {
 		MaxHeaderBytes: 1 << 20,
 	}
 
+	fmt.Println("Starting server on :3000 with AWS X-Ray tracing...")
 	server.ListenAndServe()
 
 }
