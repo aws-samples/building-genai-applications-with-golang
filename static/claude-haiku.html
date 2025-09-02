@@ -12,158 +12,286 @@
       }
 
       body {
-        /* background-color: antiquewhite; */
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        margin: 0;
+        padding: 10px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        min-height: 100vh;
       }
 
       .container {
         width: 100%;
-        max-width: 500px;
+        max-width: 900px;
         margin: auto;
-        /* background-color: antiquewhite; */
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 8px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        height: 95vh;
+        border: 1px solid rgba(255, 255, 255, 0.2);
       }
 
-      .button {
-        background-color: #43a047;
-        padding: 8px 20px;
-        border-radius: 5px;
-        border: none;
-        cursor: pointer;
-        position: absolute;
-        transform: translateY(-50%);
-        top: 50%;
-        right: 10px;
-        opacity: 0.8;
+      .chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 30px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
       }
 
-      .button:hover {
-        background-color: orange;
+      .chat-messages::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .chat-messages::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .chat-messages::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 3px;
+      }
+
+      .message {
+        max-width: 75%;
+        padding: 16px 20px;
+        border-radius: 12px;
+        line-height: 1.5;
+        word-wrap: break-word;
+        font-size: 15px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .user-message {
+        align-self: flex-end;
+        background-color: #ff9900;
+        color: white;
+        border-bottom-right-radius: 4px;
+      }
+
+      .bot-message {
+        align-self: flex-start;
+        background: white;
+        color: #2d3748;
+        border: 1px solid #e2e8f0;
+        border-bottom-left-radius: 6px;
+      }
+
+      .typing {
+        align-self: flex-start;
+        background: white;
+        color: #718096;
+        font-style: italic;
+        border: 1px solid #e2e8f0;
+        animation: pulse 1.5s infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% { opacity: 0.7; }
+        50% { opacity: 1; }
+      }
+
+      .input-area {
+        padding: 25px 30px 30px;
+        background: rgba(248, 250, 252, 0.8);
+        border-top: 1px solid rgba(226, 232, 240, 0.6);
+        border-radius: 0 0 8px 8px;
+      }
+
+      .input-container {
+        display: flex;
+        gap: 15px;
+        align-items: flex-end;
+        background: white;
+        border-radius: 8px;
+        padding: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e2e8f0;
       }
 
       .text-input {
-        padding: 10px 15px;
-        width: 100%;
+        flex: 1;
+        padding: 16px 20px;
+        border: none;
         outline: none;
-        border: solid black 1px;
-        background-color: #e0e0e0;
-        box-shadow: 0 10px 15px -3px #e0e0e0;
-
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-          Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
-          sans-serif;
-        font-size: medium;
-        font-weight: 400;
-        letter-spacing: normal;
-        line-height: 25px;
+        resize: none;
+        min-height: 80px;
+        max-height: 200px;
+        font-size: 15px;
+        line-height: 1.5;
+        font-family: inherit;
+        background: transparent;
+        border-radius: 6px;
       }
 
-      .text-input:focus {
-        border: solid #4caf50 1.5px;
-        outline: none;
+      .text-input::placeholder {
+        color: #a0aec0;
       }
 
-      .container-input {
-        position: relative;
+      .send-button {
+        background-color: #ff9900;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        width: 48px;
+        height: 48px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(255, 153, 0, 0.3);
       }
 
-      .form {
-        margin-top: 20px;
+      .send-button:hover:not(:disabled) {
+        background-color: #e88900;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(255, 153, 0, 0.4);
       }
 
-      .text-model {
-        /* color: #4caf50; */
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-          Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
-          sans-serif;
-        font-size: medium;
-        font-weight: 400;
-        letter-spacing: normal;
-        line-height: 25px;
+      .send-button:disabled {
+        background: #cbd5e0;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      .welcome-message {
+        text-align: center;
+        color: #4a5568;
+        font-size: 16px;
+        margin: 20px 0;
+        opacity: 0.8;
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <form id="form" onkeydown="return event.key != 'Enter';" class="form">
-        <div class="container-input">
-          <input class="text-input" type="text" id="text-input" />
-          <button id="submit" class="button">Ask</button>
+      <div class="chat-messages" id="chat-messages">
+        <div class="welcome-message">
+          Welcome! Ask me anything and I'll help you out.
         </div>
-      </form>
-      <div>
-        <p id="model-answer" class="text-model"></p>
+      </div>
+      <div class="input-area">
+        <div class="input-container">
+          <textarea class="text-input" id="text-input" placeholder="Type your message here... (Shift+Enter for new line)" rows="3"></textarea>
+          <button id="send-button" class="send-button">➤</button>
+        </div>
       </div>
     </div>
-    <script>
-      // conversation turns
-      let messages = [];
 
-      // get html component for model answer
-      const modelAnswer = document.getElementById("model-answer");
+    <script>
+      let messages = [];
+      const chatMessages = document.getElementById("chat-messages");
+      const textInput = document.getElementById("text-input");
+      const sendButton = document.getElementById("send-button");
+
+      // Auto-resize textarea
+      textInput.addEventListener("input", function() {
+        this.style.height = "auto";
+        this.style.height = Math.min(this.scrollHeight, 200) + "px";
+      });
+
+      function addMessage(content, isUser = false) {
+        const messageDiv = document.createElement("div");
+        messageDiv.className = `message ${isUser ? "user-message" : "bot-message"}`;
+        messageDiv.textContent = content;
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        return messageDiv;
+      }
+
+      function showTyping() {
+        const typingDiv = document.createElement("div");
+        typingDiv.className = "message typing";
+        typingDiv.textContent = "Thinking...";
+        typingDiv.id = "typing-indicator";
+        chatMessages.appendChild(typingDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        return typingDiv;
+      }
+
+      function removeTyping() {
+        const typing = document.getElementById("typing-indicator");
+        if (typing) typing.remove();
+      }
 
       const callBedrockStream = async () => {
-        // present model answer to frontend
-        modelAnswer.innerText = "";
+        const userQuestion = textInput.value.trim();
+        if (!userQuestion) return;
 
-        // get user question
-        const userQuestion = document.getElementById("text-input").value;
+        // Remove welcome message on first interaction
+        const welcomeMsg = document.querySelector(".welcome-message");
+        if (welcomeMsg) welcomeMsg.remove();
 
-        // push user question to messages
+        // Add user message
+        addMessage(userQuestion, true);
+        
+        // Clear input and disable button
+        textInput.value = "";
+        textInput.style.height = "auto";
+        sendButton.disabled = true;
+
+        // Show typing indicator
+        showTyping();
+
         messages.push({
           role: "user",
           content: [{ type: "text", text: userQuestion }],
         });
 
-        if (userQuestion) {
-          try {
-            const response = await fetch("/bedrock-haiku", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ messages: messages }),
-            });
+        try {
+          const response = await fetch("/bedrock-haiku", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ messages: messages }),
+          });
 
-            console.log(response);
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
+          removeTyping();
+          const botMessageDiv = addMessage("", false);
+          
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let fullResponse = "";
 
-            while (true) {
-              const { done, value } = await reader.read();
-              if (done) {
-                break;
-              }
-              const text = decoder.decode(value);
-              console.log(text);
-              modelAnswer.innerText += text;
-            }
-
-            // push model answer to converstion turn
-            messages.push({
-              role: "assistant",
-              content: [{ type: "text", text: modelAnswer.innerText }],
-            });
-          } catch (error) {
-            console.log(error);
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            
+            const text = decoder.decode(value);
+            fullResponse += text;
+            botMessageDiv.textContent = fullResponse;
+            chatMessages.scrollTop = chatMessages.scrollHeight;
           }
-        } else {
-          console.log("Please enter question ...");
+
+          messages.push({
+            role: "assistant",
+            content: [{ type: "text", text: fullResponse }],
+          });
+        } catch (error) {
+          removeTyping();
+          addMessage("Sorry, there was an error processing your request.", false);
         }
+
+        sendButton.disabled = false;
+        textInput.focus();
       };
 
-      document
-        .getElementById("submit")
-        .addEventListener("click", async (event) => {
+      sendButton.addEventListener("click", callBedrockStream);
+      
+      textInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" && !event.shiftKey) {
           event.preventDefault();
-          await callBedrockStream();
-        });
+          callBedrockStream();
+        }
+      });
 
-      document
-        .getElementById("text-input")
-        .addEventListener("keydown", async (event) => {
-          if (event.code === "Enter") {
-            await callBedrockStream();
-          }
-        });
+      // Focus input on load
+      textInput.focus();
     </script>
   </body>
 </html>
