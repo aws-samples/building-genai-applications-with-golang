@@ -84,7 +84,7 @@ func main() {
 
 	// frontend claude haiku
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		content, error := os.ReadFile("./static/claude-haiku.html")
+		content, error := os.ReadFile("./static/chat.html")
 		if error != nil {
 			fmt.Println(error)
 		}
@@ -94,7 +94,7 @@ func main() {
 	// backend claude haiku
 	mux.HandleFunc("/bedrock-haiku", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
-			gobedrock.HandleBedrockClaude3HaikuChat(w, r, BedrockClient)
+			gobedrock.HandleChat(w, r, BedrockClient)
 		}
 	})
 
@@ -110,7 +110,7 @@ func main() {
 	// bedrock backend to analyze image
 	mux.HandleFunc("/claude-haiku-image", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
-			gobedrock.HandleHaikuImageAnalyzer(w, r, BedrockClient)
+			gobedrock.HandleImageAnalyzer(w, r, BedrockClient)
 		}
 	})
 
