@@ -12,214 +12,358 @@
       }
 
       body {
-        /* background-color: antiquewhite; */
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        margin: 0;
+        padding: 10px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        min-height: 100vh;
       }
 
       .container {
         width: 100%;
-        max-width: 500px;
+        max-width: 900px;
         margin: auto;
-        /* background-color: antiquewhite; */
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 8px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        height: 95vh;
+        border: 1px solid rgba(255, 255, 255, 0.2);
       }
 
-      .button {
-        background-color: #43a047;
-        padding: 8px 20px;
-        border-radius: 5px;
-        border: none;
-        cursor: pointer;
-        position: absolute;
-        transform: translateY(-50%);
-        top: 50%;
-        right: 10px;
-        opacity: 0.8;
+      .chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 30px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
       }
 
-      .button:hover {
-        background-color: orange;
+      .chat-messages::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .chat-messages::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .chat-messages::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 3px;
+      }
+
+      .message {
+        max-width: 75%;
+        padding: 16px 20px;
+        border-radius: 12px;
+        line-height: 1.5;
+        word-wrap: break-word;
+        font-size: 15px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .user-message {
+        align-self: flex-end;
+        background-color: #ff9900;
+        color: white;
+        border-bottom-right-radius: 4px;
+      }
+
+      .bot-message {
+        align-self: flex-start;
+        background: white;
+        color: #2d3748;
+        border: 1px solid #e2e8f0;
+        border-bottom-left-radius: 4px;
+      }
+
+      .typing {
+        align-self: flex-start;
+        background: white;
+        color: #718096;
+        font-style: italic;
+        border: 1px solid #e2e8f0;
+        animation: pulse 1.5s infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% { opacity: 0.7; }
+        50% { opacity: 1; }
+      }
+
+      .citations {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 15px;
+        max-width: 100%;
+      }
+
+      .citation-item {
+        margin-bottom: 20px;
+        padding: 15px;
+        background: white;
+        border-radius: 6px;
+        border-left: 4px solid #ff9900;
+      }
+
+      .citation-header {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 10px;
+        font-size: 14px;
+      }
+
+      .citation-text {
+        color: #4a5568;
+        line-height: 1.5;
+        font-size: 14px;
+      }
+
+      .input-area {
+        padding: 25px 30px 30px;
+        background: rgba(248, 250, 252, 0.8);
+        border-top: 1px solid rgba(226, 232, 240, 0.6);
+        border-radius: 0 0 8px 8px;
+      }
+
+      .input-container {
+        display: flex;
+        gap: 15px;
+        align-items: flex-end;
+        background: white;
+        border-radius: 8px;
+        padding: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e2e8f0;
       }
 
       .text-input {
-        padding: 10px 15px;
-        width: 100%;
+        flex: 1;
+        padding: 16px 20px;
+        border: none;
         outline: none;
-        border: solid black 1px;
-        background-color: #e0e0e0;
-        box-shadow: 0 10px 15px -3px #e0e0e0;
-
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-          Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
-          sans-serif;
-        font-size: medium;
-        font-weight: 400;
-        letter-spacing: normal;
-        line-height: 25px;
+        resize: none;
+        min-height: 80px;
+        max-height: 200px;
+        font-size: 15px;
+        line-height: 1.5;
+        font-family: inherit;
+        background: transparent;
+        border-radius: 6px;
       }
 
-      .text-input:focus {
-        border: solid #4caf50 1.5px;
-        outline: none;
+      .text-input::placeholder {
+        color: #a0aec0;
       }
 
-      .container-input {
-        position: relative;
+      .send-button {
+        background-color: #ff9900;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        width: 48px;
+        height: 48px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(255, 153, 0, 0.3);
       }
 
-      .form {
-        margin-top: 20px;
+      .send-button:hover:not(:disabled) {
+        background-color: #e88900;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(255, 153, 0, 0.4);
       }
 
-      .text-model {
-        /* color: #4caf50; */
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-          Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
-          sans-serif;
-        font-size: medium;
-        font-weight: 400;
-        letter-spacing: normal;
-        line-height: 25px;
+      .send-button:disabled {
+        background: #cbd5e0;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      .welcome-message {
+        text-align: center;
+        color: #4a5568;
+        font-size: 16px;
+        margin: 20px 0;
+        opacity: 0.8;
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <form id="form" onkeydown="return event.key != 'Enter';" class="form">
-        <div class="container-input">
-          <input class="text-input" type="text" id="text-input" />
-          <button id="submit" class="button">retrieve</button>
+      <div class="chat-messages" id="chat-messages">
+        <div class="welcome-message">
+          Ask questions about your knowledge base and I'll retrieve relevant information.
         </div>
-      </form>
-      <div>
-        <p id="model-answer" class="text-model"></p>
       </div>
-      <div id="list" class="text-model"></div>
+      <div class="input-area">
+        <div class="input-container">
+          <textarea class="text-input" id="text-input" placeholder="Type your question here... (Shift+Enter for new line)" rows="3"></textarea>
+          <button id="send-button" class="send-button">➤</button>
+        </div>
+      </div>
     </div>
+
     <script>
-      // get html component for model answer
-      const modelAnswer = document.getElementById("model-answer");
-      // Get the list container element
-      var listContainer = document.getElementById("list");
-      // conversation turns
       let messages = [];
+      const chatMessages = document.getElementById("chat-messages");
+      const textInput = document.getElementById("text-input");
+      const sendButton = document.getElementById("send-button");
+
+      // Auto-resize textarea
+      textInput.addEventListener("input", function() {
+        this.style.height = "auto";
+        this.style.height = Math.min(this.scrollHeight, 200) + "px";
+      });
+
+      function addMessage(content, isUser = false) {
+        const messageDiv = document.createElement("div");
+        messageDiv.className = `message ${isUser ? "user-message" : "bot-message"}`;
+        messageDiv.textContent = content;
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        return messageDiv;
+      }
+
+      function addCitations(citations) {
+        const citationsDiv = document.createElement("div");
+        citationsDiv.className = "citations";
+        
+        for (let i = 0; i < citations.length; i++) {
+          const genertedPart = citations[i]["GeneratedResponsePart"]["TextResponsePart"]["Text"];
+          const retrievedReferences = citations[i]["RetrievedReferences"];
+
+          const citationItem = document.createElement("div");
+          citationItem.className = "citation-item";
+          
+          const header = document.createElement("div");
+          header.className = "citation-header";
+          header.textContent = `Citation ${i + 1} - Generated Part`;
+          
+          const text = document.createElement("div");
+          text.className = "citation-text";
+          text.textContent = genertedPart;
+          
+          citationItem.appendChild(header);
+          citationItem.appendChild(text);
+          citationsDiv.appendChild(citationItem);
+
+          for (let j = 0; j < retrievedReferences.length; j++) {
+            const refText = retrievedReferences[j]["Content"]["Text"];
+            const refUri = retrievedReferences[j]["Location"]["S3Location"]["Uri"];
+            
+            const refItem = document.createElement("div");
+            refItem.className = "citation-item";
+            
+            const refHeader = document.createElement("div");
+            refHeader.className = "citation-header";
+            refHeader.textContent = `Reference ${j + 1}`;
+            
+            const refTextDiv = document.createElement("div");
+            refTextDiv.className = "citation-text";
+            refTextDiv.textContent = `${refText}\nSource: ${refUri}`;
+            
+            refItem.appendChild(refHeader);
+            refItem.appendChild(refTextDiv);
+            citationsDiv.appendChild(refItem);
+          }
+        }
+        
+        chatMessages.appendChild(citationsDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      function showTyping() {
+        const typingDiv = document.createElement("div");
+        typingDiv.className = "message typing";
+        typingDiv.textContent = "Searching knowledge base...";
+        typingDiv.id = "typing-indicator";
+        chatMessages.appendChild(typingDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        return typingDiv;
+      }
+
+      function removeTyping() {
+        const typing = document.getElementById("typing-indicator");
+        if (typing) typing.remove();
+      }
 
       const callBedrockStream = async () => {
-        // present model answer to frontend
-        modelAnswer.innerText = "";
+        const userQuestion = textInput.value.trim();
+        if (!userQuestion) return;
 
-        // clear content before query
-        listContainer.innerHTML = "";
+        // Remove welcome message on first interaction
+        const welcomeMsg = document.querySelector(".welcome-message");
+        if (welcomeMsg) welcomeMsg.remove();
 
-        // get user question
-        const userQuestion = document.getElementById("text-input").value;
+        // Add user message
+        addMessage(userQuestion, true);
+        
+        // Clear input and disable button
+        textInput.value = "";
+        textInput.style.height = "auto";
+        sendButton.disabled = true;
 
-        // push user question to messages
+        // Show typing indicator
+        showTyping();
+
         messages.push({
           role: "user",
           content: [{ type: "text", text: userQuestion }],
         });
 
-        if (userQuestion) {
-          try {
-            const response = await fetch(
-              "/knowledge-base-retrieve-and-generate",
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ messages: messages }),
-              }
-            );
+        try {
+          const response = await fetch("/knowledge-base-retrieve-and-generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ messages: messages }),
+          });
 
-            console.log(response);
-
-            const decoder = new TextDecoder();
-
-            // batch processing
-            const json = await response.json();
-            console.log(json);
-
-            // update frontend
-            modelAnswer.innerText += json["Output"]["Text"];
-
-            // citations
-            citations = json["Citations"];
-
-            console.log(citations);
-
-            // update frontend
-            for (var i = 0; i < citations.length; i++) {
-              // generted part
-              var genertedPart =
-                citations[i]["GeneratedResponsePart"]["TextResponsePart"][
-                  "Text"
-                ];
-
-              // references
-              var retrievedReferences = citations[i]["RetrievedReferences"];
-
-              // citation i and generated i
-              var listItemC = document.createElement("div");
-              listItemC.style.marginBottom = "15px";
-              listItemC.style.borderBottom = "1px solid #0000FF";
-              listItemC.style.color = "blue";
-              var headerC = document.createElement("h4");
-              headerC.textContent = `Citation ${i} Generated Part ${i}`;
-              var itemTextC = document.createTextNode(genertedPart);
-              //
-              listItemC.appendChild(headerC);
-              listItemC.appendChild(itemTextC);
-              listContainer.appendChild(listItemC);
-
-              for (var j = 0; j < retrievedReferences.length; j++) {
-                console.log(`citation ${i} and reference ${j}`);
-
-                // reference text
-                var refText = retrievedReferences[j]["Content"]["Text"];
-                // reference uri s3
-                var refUri =
-                  retrievedReferences[j]["Location"]["S3Location"]["Uri"];
-                // citation i and reference j
-                var listItem = document.createElement("div");
-                listItem.style.marginBottom = "15px";
-                listItem.style.borderBottom = "1px solid #0000FF";
-                var header = document.createElement("h4");
-                header.textContent = `Citation ${i} Reference ${j}`;
-                var itemText = document.createTextNode(refText + refUri);
-                // citation i and reference j
-                listItem.appendChild(header);
-                listItem.appendChild(itemText);
-                listContainer.appendChild(listItem);
-              }
-            }
-
-            // push model answer to converstion turn
-            messages.push({
-              role: "assistant",
-              content: [{ type: "text", text: modelAnswer.innerText }],
-            });
-          } catch (error) {
-            console.log(error);
+          removeTyping();
+          const json = await response.json();
+          
+          // Add bot response
+          addMessage(json["Output"]["Text"], false);
+          
+          // Add citations if available
+          if (json["Citations"] && json["Citations"].length > 0) {
+            addCitations(json["Citations"]);
           }
-        } else {
-          console.log("Please enter question ...");
+
+          messages.push({
+            role: "assistant",
+            content: [{ type: "text", text: json["Output"]["Text"] }],
+          });
+        } catch (error) {
+          removeTyping();
+          addMessage("Sorry, there was an error processing your request.", false);
         }
+
+        sendButton.disabled = false;
+        textInput.focus();
       };
 
-      document
-        .getElementById("submit")
-        .addEventListener("click", async (event) => {
+      sendButton.addEventListener("click", callBedrockStream);
+      
+      textInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" && !event.shiftKey) {
           event.preventDefault();
-          await callBedrockStream();
-        });
+          callBedrockStream();
+        }
+      });
 
-      document
-        .getElementById("text-input")
-        .addEventListener("keydown", async (event) => {
-          if (event.code === "Enter") {
-            await callBedrockStream();
-          }
-        });
+      // Focus input on load
+      textInput.focus();
     </script>
   </body>
 </html>
