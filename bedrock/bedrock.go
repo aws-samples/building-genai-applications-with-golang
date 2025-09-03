@@ -16,6 +16,11 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime/types"
 )
 
+// Global Claude model parameters
+const MAX_TOKENS_TO_SAMPLE = 2048
+const ANTHROPIC_VERSION = "bedrock-2023-05-31"
+const TEMPERATURE = 0.9
+
 // claude3 request data type
 type Content struct {
 	Type string `json:"type"`
@@ -76,9 +81,9 @@ func HandleBedrockClaude3HaikuChat(w http.ResponseWriter, r *http.Request, Bedro
 	fmt.Println(messages)
 
 	payload := RequestBodyClaude3{
-		MaxTokensToSample: 2048,
-		AnthropicVersion:  "bedrock-2023-05-31",
-		Temperature:       0.9,
+		MaxTokensToSample: MAX_TOKENS_TO_SAMPLE,
+		AnthropicVersion:  ANTHROPIC_VERSION,
+		Temperature:       TEMPERATURE,
 		Messages:          messages,
 	}
 
@@ -92,7 +97,7 @@ func HandleBedrockClaude3HaikuChat(w http.ResponseWriter, r *http.Request, Bedro
 		context.Background(),
 		&bedrockruntime.InvokeModelWithResponseStreamInput{
 			Body:        payloadBytes,
-			ModelId:     aws.String("anthropic.claude-3-haiku-20240307-v1:0"),
+			ModelId:     aws.String(MODEL_ID),
 			ContentType: aws.String("application/json"),
 			Accept:      aws.String("application/json"),
 		},
