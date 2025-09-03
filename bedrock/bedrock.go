@@ -64,12 +64,10 @@ type Query struct {
 	Topic string `json:"topic"`
 }
 
-func HandleBedrockClaude3HaikuChat(w http.ResponseWriter, r *http.Request, BedrockClient *bedrockruntime.Client) {
+func HandleChat(w http.ResponseWriter, r *http.Request, BedrockClient *bedrockruntime.Client) {
 
-	// list of messages sent from frontend client
 	var request FrontEndRequest
 
-	// parse mesage from request
 	error := json.NewDecoder(r.Body).Decode(&request)
 
 	if error != nil {
@@ -117,12 +115,8 @@ func HandleBedrockClaude3HaikuChat(w http.ResponseWriter, r *http.Request, Bedro
 				fmt.Println(error)
 			}
 
-			// stream to client
-			// fmt.Println(resp.Delta.Text)
 			var tpl = template.Must(template.New("tpl").Parse(resp.Delta.Text))
 			tpl.Execute(w, nil)
-			// another way and client parse it
-			// json.NewEncoder(w).Encode(resp)
 
 			if f, ok := w.(http.Flusher); ok {
 				f.Flush()
@@ -139,8 +133,7 @@ func HandleBedrockClaude3HaikuChat(w http.ResponseWriter, r *http.Request, Bedro
 	}
 }
 
-
-func HandleHaikuImageAnalyzer(w http.ResponseWriter, r *http.Request, BedrockClient *bedrockruntime.Client) {
+func HandleImageAnalyzer(w http.ResponseWriter, r *http.Request, BedrockClient *bedrockruntime.Client) {
 
 	// allow cros
 	// w.Header().Set("Content-Type", "text/html; charset=utf-8")
