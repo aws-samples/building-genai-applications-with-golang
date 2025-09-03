@@ -138,3 +138,91 @@ func HandleBedrockClaude3HaikuChat(w http.ResponseWriter, r *http.Request, Bedro
 		}
 	}
 }
+
+
+func HandleHaikuImageAnalyzer(w http.ResponseWriter, r *http.Request, BedrockClient *bedrockruntime.Client) {
+
+	// allow cros
+	// w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	// w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	type Message struct {
+		Role    string        `json:"role"`
+		Content []interface{} `json:"content"`
+	}
+
+	type Request struct {
+		Messages []Message `json:"messages"`
+	}
+
+	type RequestBodyClaude3 struct {
+		MaxTokensToSample int       `json:"max_tokens"`
+		Temperature       float64   `json:"temperature,omitempty"`
+		AnthropicVersion  string    `json:"anthropic_version"`
+		Messages          []Message `json:"messages"`
+	}
+
+	var request Request
+	error := json.NewDecoder(r.Body).Decode(&request)
+
+	if error != nil {
+		panic(error)
+	}
+
+	messages := request.Messages
+
+	payload := RequestBodyClaude3{
+		MaxTokensToSample: MAX_TOKENS_TO_SAMPLE,
+		AnthropicVersion:  ANTHROPIC_VERSION,
+		Temperature:       TEMPERATURE,
+		Messages:          messages,
+	}
+
+	payloadBytes, error := json.Marshal(payload)
+
+	if error != nil {
+		fmt.Println(error)
+	}
+
+	output, error := BedrockClient.InvokeModelWithResponseStream(
+		context.Background(),
+		&bedrockruntime.InvokeModelWithResponseStreamInput{
+			Body:        payloadBytes,
+			ModelId:     aws.String(MODEL_ID),
+			ContentType: aws.String("application/json"),
+			Accept:      aws.String("application/json"),
+		},
+	)
+
+	if error != nil {
+		fmt.Println(error)
+	}
+
+	for event := range output.GetStream().Events() {
+		switch v := event.(type) {
+		case *types.ResponseStreamMemberChunk:
+
+			var resp ResponseClaude3
+			err := json.NewDecoder(bytes.NewReader(v.Value.Bytes)).Decode(&resp)
+			if err != nil {
+				fmt.Println(err)
+			}
+
+			fmt.Println(resp.Delta.Text)
+			var tpl = template.Must(template.New("tpl").Parse(resp.Delta.Text))
+			tpl.Execute(w, nil)
+
+			if f, ok := w.(http.Flusher); ok {
+				f.Flush()
+			} else {
+				fmt.Print("Damn, no flush")
+			}
+
+		case *types.UnknownUnionMember:
+			fmt.Println("unknown tag:", v.Tag)
+
+		default:
+			fmt.Println("union is nil or unknown type")
+		}
+	}
+}
